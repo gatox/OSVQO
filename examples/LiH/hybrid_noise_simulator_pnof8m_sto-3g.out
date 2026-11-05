@@ -1,0 +1,170 @@
+
+-----------------------------------------------------------------------------------------------
+                                               OS-VQO
+                            (Natural-orbital and occupation optimization)
+-----------------------------------------------------------------------------------------------
+                               Implemented by E. X. Salazar, M. Piris
+
+Ref. Occupation-space variational quantum optimization (2026). doi:10.26434/chemrxiv.15008226
+
+functional: pnof8m
+basis_set: sto-3g
+OS-VQO optimizer: slsqp
+NO optimizer: ADAM
+
+Geometry sent to Psi4:
+symmetry c1
+no_reorient
+no_com
+units bohr
+0 1
+H  0.0000  0.0000  0.0000
+Li  0.0000  0.0000  3.0236
+
+Total AO integrals time: 00:00:00:00
+Format: DD:HH:MM:SS
+OS-VQO occupation-space resources:
+  Pair 1: orbitals=[0, 4, 5], d=3, m=2, logical qubits=2
+  Pair 2: orbitals=[1, 2, 3], d=3, m=2, logical qubits=2
+  Number of pair subspaces: 2
+  Total OS parameters / logical rotation gates: 4 / 4
+  Total logical qubits: 4
+  Logical ansatz depth estimate: 2 layers (assuming independent pair registers run in parallel)
+  Resource counts are pre-transpilation; hardware gate counts/depth may be larger.
+init_param: None
+Computing HF energy and C_MO
+HF energy: -7.861864368252378
+HF energy time: 00:00:00:00
+Format: DD:HH:MM:SS
+No violations of the orthonormality
+OS-VQO analytic simulator activated; occupations are evaluated analytically.
+
+===============================================================================================
+                                   SC-OS-VQO OPTIMIZATION
+===============================================================================================
+  It   OccIt   OrbIt  MaxOrb         Total Energy     Delta Etot     Delta Eocc      MaxDiff
+-----------------------------------------------------------------------------------------------
+   1       9      10      10      -7.869391214005      ---------      ---------    2.418e-03
+   2       7      10      10      -7.873390369324     -3.999e-03     -8.419e-04    3.639e-03
+   3       7      10      10      -7.878941393386     -5.551e-03     -1.261e-03    4.805e-03
+   4       7      10      10      -7.882956113632     -4.015e-03     -7.193e-04    3.559e-03
+   5       8      10      10      -7.884710451473     -1.754e-03     -1.575e-04    1.462e-03
+   6       7      10      10      -7.885054179524     -3.437e-04     -1.847e-05    2.911e-03
+   7       9      10      10      -7.885083741861     -2.956e-05     -2.012e-05    5.961e-04
+   8       3      20      20      -7.885087560303     -3.818e-06     -4.731e-08    3.081e-04
+   9       6      30      30      -7.885087921560     -3.613e-07     -1.890e-07    6.681e-05
+-----------------------------------------------------------------------------------------------
+SC-OS-VQO converged: MaxDiff = 6.681e-05 < 1.0e-04, |Delta Etot| = 3.613e-07 < 1.0e-06
+==== Hybrid mode activated ====
+Optimization device: simulator
+Evaluation device: noise_simulator
+===============================
+Calling noise_simulator:
+
+Qiskit physical initial layout:
+None
+
+Layout selection: automatic Qiskit transpiler layout (no user initial_layout supplied).
+OS-VQO quantum circuit activated
+OS logical qubits: 4
+OS parameters: 4
+>>> USING SPECIALIZED m=2 KERNEL
+>>> USING SPECIALIZED m=2 KERNEL
+
+Building OS-VQO readout calibration matrices...
+
+==========================================
+       OS-VQO READOUT MITIGATION
+==========================================
+
+Pair 0: m=2, wires=[0, 1]
+  ||Delta p|| = 0.003552102674614629
+
+Pair 1: m=2, wires=[2, 3]
+  ||Delta p|| = 0.005854688676383463
+>>> OS POSTSELECT PORB. ACTIVATED
+
+==========================================
+     OS-VQO LOGICAL-SUBSPACE STATS
+==========================================
+
+Pair 0: m=2, d=3, wires=[0, 1]
+  P(valid) = 0.99768253
+  leakage  = 0.00231747
+  unused   = [1]
+
+Pair 1: m=2, d=3, wires=[2, 3]
+  P(valid) = 0.99797227
+  leakage  = 0.00202773
+  unused   = [1]
+
+Mean leakage    = 0.0021725994628808976
+Maximum leakage = 0.0023174664980265547
+
+==========================================
+       OS-VQO CIRCUIT RESPONSE
+          MATRIX CALIBRATION
+==========================================
+
+
+==========================================
+      OS-VQO RESPONSE MITIGATION
+==========================================
+
+OS-VQO analytic simulator activated; occupations are evaluated analytically.
+
+           RESULTS OF THE OCCUPATION OPTIMIZATION          
+===========================================================
+
+                 Source : hybrid_noise_simulator->noise_simulator
+            occupations : noise_simulator-evaluated occupations
+NOF physical projection : True
+
+Reference simulator occupation vector:
+[9.99927299e-01 9.77734487e-01 2.11210811e-02 1.14443214e-03
+ 4.48362982e-05 2.78643059e-05]
+
+
+Evaluated/corrected occupation vector:
+[9.97384593e-01 9.73021226e-01 2.47430470e-02 2.23572658e-03
+ 5.99218212e-04 2.01618889e-03]
+
+
+ Idx        n        E (Hartree)
+   1    1.9947692   -2.34696369
+   2    1.9460425   -0.30230023
+   3    0.0494861   -0.01889661
+   4    0.0044715   -0.00130260
+   5    0.0011984   -0.00092699
+   6    0.0040324   -0.00161050
+
+--------------------------------------------------
+                   Final Energies                 
+--------------------------------------------------
+
+            HF Total Energy = -7.861864368252
+
+     Final NOF Total Energy = -7.874260609631
+         Correlation Energy = -0.012396241378
+
+Sim. Final NOF Total Energy = -7.885087921560
+Sim.     Correlation Energy = -0.023223553308
+
+==================== Comparison ==================
+
+                 Abs_Diff_E =  0.010827311930
+                 ||Diff_n|| =  0.006873900837
+
+
+Total job time: 00:00:00:16
+Format: DD:HH:MM:SS
+Finished at:    Thu Nov  5 12:46:28 2026
+Transpiled circuit backend: aer_simulator_from(ibm_basquecountry)
+OS-VQO transpiled circuit resources (latest compiled circuit batch):
+  Circuit 1:
+    Transpiled circuit width: 156 qubits
+    Transpiled depth: 2
+    Transpiled gate counts: {'x': 4, 'measure': 4, 'barrier': 1}
+    Final logical-to-physical mapping: {0: 32, 1: 110, 2: 152, 3: 153}
+    Physical qubits used: [32, 110, 152, 153]
+OS-VQO total energy (pnof8m, sto-3g): -7.874260609631 Ha

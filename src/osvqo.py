@@ -562,6 +562,9 @@ class OSVQO:
                     if self.initial_layout is not None:
                         device_kwargs['initial_layout'] = self.initial_layout
                     dev = qml.device('qiskit.remote', **device_kwargs)
+                    self._capture_compiled_circuits(dev)
+                    if self.initial_layout is None:
+                        print('Layout selection: automatic Qiskit transpiler layout (no user initial_layout supplied).')
                     break
                 except (ApiException, InvalidAccountError) as e:
                     print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] IBM Q call failed (attempt {attempt + 1}/{max_retries}): {e}")
@@ -575,6 +578,72 @@ class OSVQO:
                 else:
                     raise RuntimeError('IBM Q unavailable after retries')
         return dev
+
+    def _capture_compiled_circuits(self, device):
+        """Keep the latest backend-transpiled Qiskit circuits for diagnostics.
+
+        PennyLane-Qiskit compiles the circuit immediately before Runtime submission.
+        Wrapping this device method records those compiled circuits without adding
+        another transpilation or quantum execution.
+        """
+        if not hasattr(device, 'compile_circuits'):
+            print('Transpiled circuit diagnostics unavailable: device exposes no compile_circuits method.')
+            return
+        if getattr(device, '_osvqo_compile_capture_installed', False):
+            return
+
+        original_compile = device.compile_circuits
+
+        def compile_and_capture(circuits):
+            compiled = original_compile(circuits)
+            self._last_transpiled_circuits = compiled
+            self._last_transpiled_backend = getattr(device, 'backend', None)
+            return compiled
+
+        try:
+            device.compile_circuits = compile_and_capture
+            device._osvqo_compile_capture_installed = True
+        except Exception as exc:
+            print(f'Transpiled circuit diagnostics unavailable ({type(exc).__name__}: {exc}).')
+
+    def _report_transpiled_resources(self):
+        """Print resources and final physical placement from the last compiled circuits."""
+        circuits = getattr(self, '_last_transpiled_circuits', None)
+        if not circuits:
+            if self.dev != 'simulator':
+                print('No transpiled Qiskit circuit was captured; check PennyLane-Qiskit compatibility.')
+            return
+
+        backend = getattr(self, '_last_transpiled_backend', None)
+        if backend is not None:
+            backend_name = getattr(backend, 'name', None)
+            try:
+                backend_name = backend_name() if callable(backend_name) else backend_name
+            except Exception:
+                pass
+            print('Transpiled circuit backend:', backend_name or type(backend).__name__)
+
+        print('OS-VQO transpiled circuit resources (latest compiled circuit batch):')
+        for circuit_index, circuit in enumerate(circuits):
+            print(f'  Circuit {circuit_index + 1}:')
+            print(f'    Transpiled circuit width: {circuit.num_qubits} qubits')
+            print(f'    Transpiled depth: {circuit.depth()}')
+            print(f'    Transpiled gate counts: {dict(circuit.count_ops())}')
+            layout = getattr(circuit, 'layout', None)
+            if layout is None:
+                print('    Final logical-to-physical mapping: unavailable (transpiler returned no layout metadata)')
+                continue
+            try:
+                final_mapping = layout.final_index_layout(filter_ancillas=True)
+                print('    Final logical-to-physical mapping:', dict(enumerate(final_mapping)))
+                print('    Physical qubits used:', sorted(set(final_mapping)))
+            except Exception:
+                try:
+                    initial_mapping = layout.initial_layout.get_virtual_bits()
+                    print('    Initial virtual-to-physical mapping:', {str(q): p for q, p in initial_mapping.items()})
+                    print('    Final mapping: unavailable from this Qiskit layout object')
+                except Exception as exc:
+                    print(f'    Layout metadata could not be decoded ({type(exc).__name__}: {exc})')
 
     def _global_parameters(self, wfn):
         """Set closed-shell system dimensions and construct OS-VQO pair spaces."""
@@ -676,6 +745,7 @@ class OSVQO:
     def run(self, max_outer=120):
         """Run OS-VQO and return energy, parameters, occupations, orbitals, and multipliers."""
         self.result = self._run_osvqo(max_outer=max_outer)
+        self._report_transpiled_resources()
         return self.result
 
     def nuclear_gradient(self, result=None):
