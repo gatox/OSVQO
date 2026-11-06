@@ -1,6 +1,6 @@
-# OS-VQO challenge module
+# OS-VQO
 
-This is the challenge-focused extraction of the OS-VQO path from the larger `NOFVQE` implementation. It exposes a single public calculator class:
+The Occupation-Space Variational Quantum Optimization algorithm is introduced as a new framework for quantum electronic structure calculations in which the quantum variational object is an occupation state rather than a many-electron wavefunction. The following exposes a single public calculator class:
 
 ```python
 from osvqo import OSVQO
