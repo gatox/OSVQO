@@ -1,11 +1,12 @@
 # OS-VQO
+[![doi](https://img.shields.io/badge/DOI-10.26434/chemrxiv.15008226/v1-darkgreen)](https://doi.org/10.26434/chemrxiv.15008226/v1)
 
 The Occupation-Space Variational Quantum Optimization algorithm is introduced as a new framework for quantum electronic structure calculations in which the quantum variational object is an occupation state rather than a many-electron wavefunction. The following exposes a single public calculator class:
 
 ```python
 from osvqo import OSVQO
 
-geometry = """units angstrom
+geometry = """units angstrom 
 0 1
 H 0.0 0.0 0.0
 H 0.0 0.0 0.735
@@ -51,10 +52,6 @@ Arguments are `geometry_file functional basis save_params [layout]`. `save_param
 ## Printed occupation-space and circuit information
 
 At the start of a calculation, `OSVQO` prints each pair subspace, its orbital indices, occupation-space dimension `d=m+1`, `m`, and its logical qubit requirement `ceil(log2(d))`. It also prints total logical qubits and OS parameters. The reported logical ansatz gate count and depth are computed from the parameterized two-level rotations without running a circuit, so this diagnostic adds negligible work when `dev="simulator"`. Depth assumes distinct pair registers can run in parallel. These are pre-transpilation logical resources; routing and decomposition for a particular backend can increase physical gate count and depth.
-
-The run header includes the manuscript citation:
-
-> Implemented by E. X. Salazar, M. Piris, *Occupation-space variational quantum optimization* (2026). doi:10.26434/chemrxiv.15008226
 
 ## IBM Quantum Runtime account profile
 
